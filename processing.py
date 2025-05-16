@@ -1,12 +1,16 @@
 from .io import read_txt_parameters
 from .filters import quick_check_int_file
-from .fileops import copy_file, find_matching_bmp
 import shutil
+from .fileops import (
+    copy_file, find_matching_bmp, render_final_figure_to_fixed_canvas
+)
+
 def process_single_txt_file(txt_path, output_folder, keywords):
     """
     Processes a single .txt file:
     - Copies informative .int channels
     - Copies associated .bmp files
+    - Creates a vector-annotated .svg figure from each .bmp
     - Copies the .txt only if any informative channel is found
     """
     base_folder = txt_path.parent
@@ -18,6 +22,9 @@ def process_single_txt_file(txt_path, output_folder, keywords):
     except KeyError:
         print(f"Skipping {txt_path.name}: missing xPixel or yPixel")
         return []
+
+    # Get physical scan range for scale bar
+    scan_range = float(params.get("XScanRange", 100.0))  # default fallback
 
     informative_channels = []
 
@@ -31,38 +38,31 @@ def process_single_txt_file(txt_path, output_folder, keywords):
             continue
 
         if quick_check_int_file(int_path, x_pixels, y_pixels):
-            # Copy the .int file
-            shutil.copy(int_path, output_folder / int_path.name)
+            copy_file(int_path, output_folder)
             informative_channels.append(ch)
 
-            # Copy the .bmp file with same name but .bmp extension
-            # Try to find a .bmp file in the folder with the .int stem as substring
-            bmp_candidates = list(base_folder.glob("*.bmp"))
-            int_stem = int_path.stem.replace(" ", "").lower()
-
-            # Try loose matching: remove spaces, compare lowercase
-            matching_bmps = [
-                bmp for bmp in bmp_candidates
-                if int_stem in bmp.stem.replace(" ", "").lower()
-            ]
-
-            if len(matching_bmps) == 1:
-                shutil.copy(matching_bmps[0], output_folder / matching_bmps[0].name)
-            elif len(matching_bmps) > 1:
-                print(f"Multiple BMP matches for {int_path.name}; copying first: {matching_bmps[0].name}")
-                shutil.copy(matching_bmps[0], output_folder / matching_bmps[0].name)
+            # Try to find matching .bmp file
+            matching_bmps = find_matching_bmp(int_path, base_folder)
+            if matching_bmps:
+                bmp = matching_bmps[0]
+                copied_bmp = output_folder / bmp.name
+                copy_file(bmp, output_folder)
+                copied_bmp = output_folder / bmp.name
+                render_final_figure_to_fixed_canvas(
+                    bmp_path=copied_bmp,
+                    scan_range_nm=scan_range,
+                    raw_image_pixel_width=x_pixels,
+                    params=params
+                )
             else:
                 print(f"Warning: No matching BMP found for {int_path.name}")
-
         else:
-            print(f"Skipped {ch}: flat or uniform")
+            print(f"Skipped {ch}: all zeros")
 
     if informative_channels:
-        shutil.copy(txt_path, output_folder / txt_path.name)
+        copy_file(txt_path, output_folder)
         print(f"{txt_path.name} → {len(informative_channels)} channel(s) copied")
-
     else:
         print(f"{txt_path.name} skipped: no informative channels")
 
     return informative_channels
-
