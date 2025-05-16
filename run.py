@@ -1,11 +1,11 @@
-from .batch import batch_process_folder
+from sxm2py.batch import batch_process_folder
 
-def main()
+def main():
     batch_process_folder(
-        folder_path=rQUSERSBENScripts20250514,
-        output_subfolder=Processed,
-        keywords=[TopoFwd, It_extFwd]
+        folder_path=path,
+        output_subfolder="Processed",
+        keywords=["TopoFwd", "It_extFwd"]
     )
 
-if __name__ == __main__
+if __name__ == "__main__":
     main()
