@@ -1,4 +1,5 @@
 from sxm2py.batch import batch_process_folder
+from sxm2py.ppt import export_images_to_pptx
 
 def main():
     batch_process_folder(
