@@ -17,18 +17,16 @@
 
 ## Expected Input Folder Structure
 
-├── scan1.txt
-├── scan1TopoFwd.int
-├── scan1TopoFwd.bmp
-├── scan1BiasFwd.int
-├── scan1BiasFwd.bmp
-├── ...
+Folder \
+├── scan1.txt \
+├── scan1TopoFwd.int \
+├── scan1TopoFwd.bmp 
 
 Each `.txt` file describes the scan parameters and lists the `.int` files used. This tool will parse each `.txt`, inspect the listed `.int` files, and retain only those that contain real data. This is for example useful to avoid bacward/forward empty files, channels that are preserved but contain no changes (Bias, qPlus AFM is there is no afm acquisition, LIAX, LIAY, etc)
 
 ## How to Use
 
-You must run the file 'run.py'. By default I have kept onlt the topgrahy forward channel and the tunneling current, but you can add any other names tfor matching your file names :
+You must run the file 'run.py'. In path of batch_process_folder put your path to your datafiles. By default I have kept onlt the topgrahy forward channel and the tunneling current, but you can add any other names tfor matching your file names :
 from sxm2py.batch import batch_process_folder
 
 batch_process_folder(
