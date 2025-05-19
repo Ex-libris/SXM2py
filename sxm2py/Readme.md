@@ -32,7 +32,7 @@ You must run the file 'run.py'. By default I have kept onlt the topgrahy forward
 from sxm2py.batch import batch_process_folder
 
 batch_process_folder(
-    folder_path=path,
+    folder_path= path,
     output_subfolder="Processed",
     keywords=["TopoFwd", "It_extFwd"]
 )
