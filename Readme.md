@@ -1,5 +1,9 @@
 # sxm2py
 
+
+**TLDR**
+If you have a folder with Anfatec files of a session of SPM, you can use this script to remove all the extra or redundant channels that contain no information, reducing the size of the folder. In addition, you can create a summary .ppt with the images stored as .bmp.
+
 **STM Channel Filter and Extractor for Anfatec SXM Controller Data**
 
 `sxm2py` is a Python tool to batch-process STM data acquired using the Anfatec SXM controller. It filters `.int` channel files based on signal content, preserving only those that contain non-zero data. It also copies matching `.bmp` image files and associated `.txt` metadata files for further analysis into a different subfolder 'Processed'.
