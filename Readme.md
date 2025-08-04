@@ -1,7 +1,8 @@
 # sxm2py
 
 
-**TLDR**
+**TLDR;**
+
 If you have a folder with Anfatec files of a session of SPM, you can use this script to remove all the extra or redundant channels that contain no information, reducing the size of the folder. In addition, you can create a summary .ppt with the images stored as .bmp.
 
 **STM Channel Filter and Extractor for Anfatec SXM Controller Data**
