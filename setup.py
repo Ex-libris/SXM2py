@@ -1,13 +1,21 @@
+"""
+Packaging configuration for the ``sxm2py`` project.
+
+Benjamin Mallada 2025
+"""
+
 from setuptools import setup, find_packages
 
+
 setup(
-    name='sxm2py',
-    version='0.1',
+    name="sxm2py",
+    version="0.1",
     packages=find_packages(),
-    install_requires=['numpy'],
+    install_requires=["numpy"],
     entry_points={
-        'console_scripts': [
-            'sxm2py = sxm2py.run:main',
+        "console_scripts": [
+            "sxm2py = sxm2py.run:main",
         ],
     },
 )
+
