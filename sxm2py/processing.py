@@ -1,68 +1,73 @@
+"""
+Processing pipeline for single measurement files.
+
+Benjamin Mallada 2025
+"""
+
 from .io import read_txt_parameters
 from .filters import quick_check_int_file
-import shutil
 from .fileops import (
-    copy_file, find_matching_bmp, render_final_figure_to_fixed_canvas
+    copy_file,
+    find_matching_bmp,
+    render_final_figure_to_fixed_canvas,
 )
 
-def process_single_txt_file(txt_path, output_folder, keywords):
-    """
-    Processes a single .txt file:
-    - Copies informative .int channels
-    - Copies associated .bmp files
-    - Creates a vector-annotated .svg figure from each .bmp
-    - Copies the .txt only if any informative channel is found
-    """
-    base_folder = txt_path.parent
-    params, channels = read_txt_parameters(txt_path)
+
+def process_single_txt_file(txt_file_path, output_directory, keywords):
+    """Process one ``.txt`` file and copy informative channels."""
+    base_directory = txt_file_path.parent
+    parameters, channel_filenames = read_txt_parameters(txt_file_path)
 
     try:
-        x_pixels = int(params['xPixel'])
-        y_pixels = int(params['yPixel'])
+        x_pixels = int(parameters["xPixel"])
+        y_pixels = int(parameters["yPixel"])
     except KeyError:
-        print(f"Skipping {txt_path.name}: missing xPixel or yPixel")
+        print(f"Skipping {txt_file_path.name}: missing xPixel or yPixel")
         return []
 
     # Get physical scan range for scale bar
-    scan_range = float(params.get("XScanRange", 100.0))  # default fallback
+    scan_range = float(parameters.get("XScanRange", 100.0))  # default fallback
 
     informative_channels = []
 
-    for ch in channels:
-        if not any(k in ch for k in keywords):
+    for channel_filename in channel_filenames:
+        if not any(keyword in channel_filename for keyword in keywords):
             continue
 
-        int_path = base_folder / ch
-        if not int_path.exists():
-            print(f"Missing .int file: {int_path.name}")
+        int_file_path = base_directory / channel_filename
+        if not int_file_path.exists():
+            print(f"Missing .int file: {int_file_path.name}")
             continue
 
-        if quick_check_int_file(int_path, x_pixels, y_pixels):
-            copy_file(int_path, output_folder)
-            informative_channels.append(ch)
+        if quick_check_int_file(int_file_path, x_pixels, y_pixels):
+            copy_file(int_file_path, output_directory)
+            informative_channels.append(channel_filename)
 
-            # Try to find matching .bmp file
-            matching_bmps = find_matching_bmp(int_path, base_folder)
-            if matching_bmps:
-                bmp = matching_bmps[0]
-                copied_bmp = output_folder / bmp.name
-                copy_file(bmp, output_folder)
-                copied_bmp = output_folder / bmp.name
+            # Try to find matching .bmp file and annotate it
+            matching_bmp_files = find_matching_bmp(int_file_path, base_directory)
+            if matching_bmp_files:
+                bmp_file = matching_bmp_files[0]
+                copy_file(bmp_file, output_directory)
+                copied_bmp_path = output_directory / bmp_file.name
                 render_final_figure_to_fixed_canvas(
-                    bmp_path=copied_bmp,
+                    bmp_path=copied_bmp_path,
                     scan_range_nm=scan_range,
                     raw_image_pixel_width=x_pixels,
-                    params=params
+                    params=parameters,
                 )
             else:
-                print(f"Warning: No matching BMP found for {int_path.name}")
+                print(
+                    f"Warning: No matching BMP found for {int_file_path.name}"
+                )
         else:
-            print(f"Skipped {ch}: all zeros")
+            print(f"Skipped {channel_filename}: all zeros")
 
     if informative_channels:
-        copy_file(txt_path, output_folder)
-        print(f"{txt_path.name} → {len(informative_channels)} channel(s) copied")
+        copy_file(txt_file_path, output_directory)
+        print(
+            f"{txt_file_path.name} → {len(informative_channels)} channel(s) copied"
+        )
     else:
-        print(f"{txt_path.name} skipped: no informative channels")
+        print(f"{txt_file_path.name} skipped: no informative channels")
 
     return informative_channels

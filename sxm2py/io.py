@@ -1,34 +1,44 @@
-def parse_value(value):
+"""
+Utilities for parsing parameter ``.txt`` files.
+
+Benjamin Mallada 2025
+"""
+
+
+def parse_value(raw_value):
+    """Convert ``raw_value`` to float when possible."""
     try:
-        return float(value.replace(',', '.'))
+        return float(raw_value.replace(",", "."))
     except ValueError:
-        return value.strip()
+        return raw_value.strip()
 
-def read_txt_parameters(txt_file):
-    """Reads metadata and channel filenames from a .txt file."""
-    params = {}
-    channels = []
 
-    with open(txt_file, 'r', encoding='utf-8', errors='ignore') as f:
-        lines = f.readlines()
+def read_txt_parameters(txt_file_path):
+    """Read metadata and channel filenames from a ``.txt`` file."""
+    parameters = {}
+    channel_filenames = []
+
+    with open(txt_file_path, "r", encoding="utf-8", errors="ignore") as file_handle:
+        lines = file_handle.readlines()
 
     in_file_desc = False
     for line in lines:
         line = line.strip()
-        if line.startswith('FileDescBegin'):
+        if line.startswith("FileDescBegin"):
             in_file_desc = True
-        elif line.startswith('FileDescEnd'):
+        elif line.startswith("FileDescEnd"):
             in_file_desc = False
-        elif in_file_desc and line.startswith('FileName'):
-            _, filename = line.split(':', 1)
-            channels.append(filename.strip())
-        elif ':' in line:
+        elif in_file_desc and line.startswith("FileName"):
+            _, filename = line.split(":", 1)
+            channel_filenames.append(filename.strip())
+        elif ":" in line:
             try:
-                key, value = line.split(':', 1)
-                params[key.strip()] = parse_value(value.strip())
+                key, value = line.split(":", 1)
+                parameters[key.strip()] = parse_value(value.strip())
             except ValueError:
                 continue
 
-    return params, channels
+    return parameters, channel_filenames
+
 
 

@@ -1,24 +1,35 @@
+"""
+Batch helpers for processing multiple ``.txt`` files.
+
+Benjamin Mallada 2025
+"""
+
 from pathlib import Path
 from .processing import process_single_txt_file
 
-def batch_process_folder(folder_path, output_subfolder, keywords):
-    folder_path = Path(folder_path)
-    output_folder = folder_path / output_subfolder
+
+def batch_process_folder(data_directory, output_subfolder_name, keywords):
+    """Process every ``.txt`` file in ``data_directory``."""
+    data_directory = Path(data_directory)
+    output_folder = data_directory / output_subfolder_name
     output_folder.mkdir(exist_ok=True)
 
-    txt_files = list(folder_path.glob("*.txt"))
+    txt_files = list(data_directory.glob("*.txt"))
     summary = {}
 
-    for txt_file in txt_files:
-        kept = process_single_txt_file(txt_file, output_folder, keywords)
-        if kept:
-            summary[txt_file.name] = kept
+    for txt_file_path in txt_files:
+        informative_channels = process_single_txt_file(
+            txt_file_path, output_folder, keywords
+        )
+        if informative_channels:
+            summary[txt_file_path.name] = informative_channels
 
     print("\n=== Summary ===")
-    for fname, channels in summary.items():
-        print(f"{fname}: {len(channels)} channel(s) kept")
-        for ch in channels:
-            print(f"  - {ch}")
+    for txt_filename, channel_list in summary.items():
+        print(f"{txt_filename}: {len(channel_list)} channel(s) kept")
+        for channel_name in channel_list:
+            print(f"  - {channel_name}")
 
     return summary
+
 
